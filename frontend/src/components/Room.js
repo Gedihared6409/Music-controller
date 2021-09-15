@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Grid, Button, Typography } from "@material-ui/core";
+import {
+  Grid,
+  Button,
+  Typography,
+  responsiveFontSizes,
+} from "@material-ui/core";
+import CreateRoomPage from "./CreateRoomPage";
 
 export default class Room extends Component {
   constructor(props) {
@@ -8,14 +14,23 @@ export default class Room extends Component {
       votesToSkip: 2,
       guestCanPause: false,
       isHost: false,
+      showSettings: false,
+      spotifyAuthenticated: false,
     };
     this.roomCode = this.props.match.params.roomCode;
-    this.getRoomDetails();
+    console.log(this.roomCode)
     this.leaveButtonPressed = this.leaveButtonPressed.bind(this);
+    this.updateShowSettings = this.updateShowSettings.bind(this);
+    this.renderSettingsButton = this.renderSettingsButton.bind(this);
+    this.renderSettings = this.renderSettings.bind(this);
+    this.getRoomDetails = this.getRoomDetails.bind(this);
+    this.authenticateSpotify = this.authenticateSpotify.bind(this);
+    this.getRoomDetails();
+    console.log(document.cookie.match(/PHPSESSID=[^;]+/))
   }
 
   getRoomDetails() {
-    return fetch("/api/get-room" + "?code=" + this.roomCode)
+    return fetch("http://127.0.0.1:8000/get-room" + "?code=" + this.roomCode)
       .then((response) => {
         if (!response.ok) {
           this.props.leaveRoomCallback();
@@ -29,6 +44,26 @@ export default class Room extends Component {
           guestCanPause: data.guest_can_pause,
           isHost: data.is_host,
         });
+        // console.log(data.host)
+        if (this.state.isHost) {
+          this.authenticateSpotify();
+        }
+      });
+  }
+
+  authenticateSpotify() {
+    fetch("/spotify/is-authenticated")
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState({ spotifyAuthenticated: data.status });
+        console.log(data.status);
+        if (!data.status) {
+          fetch("/spotify/get-auth-url")
+            .then((response) => response.json())
+            .then((data) => {
+              window.location.replace(data.url);
+            });
+        }
       });
   }
 
@@ -37,13 +72,61 @@ export default class Room extends Component {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     };
-    fetch("/api/leave-room", requestOptions).then((_response) => {
+    fetch("http://127.0.0.1:8000/leave-room", requestOptions).then((_response) => {
       this.props.leaveRoomCallback();
       this.props.history.push("/");
     });
   }
 
+  updateShowSettings(value) {
+    this.setState({
+      showSettings: value,
+    });
+  }
+
+  renderSettings() {
+    return (
+      <Grid container spacing={1}>
+        <Grid item xs={12} align="center">
+          <CreateRoomPage
+            update={true}
+            votesToSkip={this.state.votesToSkip}
+            guestCanPause={this.state.guestCanPause}
+            roomCode={this.roomCode}
+            updateCallback={this.getRoomDetails}
+          />
+        </Grid>
+        <Grid item xs={12} align="center">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => this.updateShowSettings(false)}
+          >
+            Close
+          </Button>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  renderSettingsButton() {
+    return (
+      <Grid item xs={12} align="center">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => this.updateShowSettings(true)}
+        >
+          Settings
+        </Button>
+      </Grid>
+    );
+  }
+
   render() {
+    if (this.state.showSettings) {
+      return this.renderSettings();
+    }
     return (
       <Grid container spacing={1}>
         <Grid item xs={12} align="center">
@@ -66,12 +149,15 @@ export default class Room extends Component {
             Host: {this.state.isHost.toString()}
           </Typography>
         </Grid>
+        {this.renderSettingsButton() }
+        
         <Grid item xs={12} align="center">
           <Button
             variant="contained"
             color="secondary"
             onClick={this.leaveButtonPressed}
           >
+            
             Leave Room
           </Button>
         </Grid>
