@@ -21,7 +21,7 @@ export default class HomePage extends Component {
   }
 
   async componentDidMount() {
-    fetch("http://127.0.0.1:8000/user-in-room")
+    fetch("/api/user-in-room")
       .then((response) => response.json())
       .then((data) => {
         this.setState({
@@ -34,7 +34,7 @@ export default class HomePage extends Component {
     return (
       <Grid container spacing={3}>
         <Grid item xs={12} align="center">
-          <Typography variant="h3" component={'span'} compact="h3">
+          <Typography variant="h3" compact="h3">
             House Party
           </Typography>
         </Grid>
