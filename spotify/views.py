@@ -38,6 +38,7 @@ def spotify_callback(request, format=None):
     access_token = response.get('access_token')
     token_type = response.get('token_type')
     refresh_token = response.get('refresh_token')
+    print(refresh_token)
     expires_in = response.get('expires_in')
     error = response.get('error')
 
@@ -59,7 +60,8 @@ class IsAuthenticated(APIView):
 
 class CurrentSong(APIView):
     def get(self, request, format=None):
-        room_code = self.request.session.get('room_code')
+        room_code = 'AMIGJX'
+        print(room_code)
         room = Room.objects.filter(code=room_code)
         if room.exists():
             room = room[0]

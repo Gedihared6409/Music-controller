@@ -21,7 +21,7 @@ export default class HomePage extends Component {
   }
 
   async componentDidMount() {
-    fetch("/api/user-in-room")
+    fetch("http://127.0.0.1:8000/user-in-room")
       .then((response) => response.json())
       .then((data) => {
         this.setState({
@@ -29,6 +29,7 @@ export default class HomePage extends Component {
         });
       });
   }
+  
 
   renderHomePage() {
     return (

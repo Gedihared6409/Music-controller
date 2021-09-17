@@ -9,7 +9,7 @@ BASE_URL = "https://api.spotify.com/v1/me/"
 
 
 def get_user_tokens(session_id):
-    print(session_id)
+   
     user_tokens = SpotifyToken.objects.filter(user=session_id)
     if user_tokens.exists():
         return user_tokens[0]
@@ -19,6 +19,7 @@ def get_user_tokens(session_id):
 
 def update_or_create_user_tokens(session_id, access_token, token_type, expires_in, refresh_token):
     tokens = get_user_tokens(session_id)
+    print(tokens.access_token)
     expires_in = timezone.now() + timedelta(seconds=expires_in)
 
     if tokens:
@@ -28,6 +29,7 @@ def update_or_create_user_tokens(session_id, access_token, token_type, expires_i
         tokens.token_type = token_type
         tokens.save(update_fields=['access_token',
                                    'refresh_token', 'expires_in', 'token_type'])
+                                   
     else:
         tokens = SpotifyToken(user=session_id, access_token=access_token,
                               refresh_token=refresh_token, token_type=token_type, expires_in=expires_in)
@@ -36,7 +38,7 @@ def update_or_create_user_tokens(session_id, access_token, token_type, expires_i
 def is_spotify_authenticated(session_id):
     print(session_id)
     tokens = get_user_tokens(session_id)
-    print(tokens)
+    
     if tokens:
         expiry = tokens.expires_in
         if expiry <= timezone.now():
@@ -49,6 +51,7 @@ def is_spotify_authenticated(session_id):
 
 def refresh_spotify_token(session_id):
     refresh_token = get_user_tokens(session_id).refresh_token
+    print('cawilo')
 
     response = post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'refresh_token',
@@ -58,6 +61,7 @@ def refresh_spotify_token(session_id):
     }).json()
 
     access_token = response.get('access_token')
+    print(access_token)
     token_type = response.get('token_type')
     expires_in = response.get('expires_in')
     refresh_token = response.get('refresh_token')
@@ -67,6 +71,7 @@ def refresh_spotify_token(session_id):
 
 def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
     tokens = get_user_tokens(session_id)
+    
     headers = {'Content-Type': 'application/json',
                'Authorization': "Bearer " + tokens.access_token}
 
@@ -76,6 +81,7 @@ def execute_spotify_api_request(session_id, endpoint, post_=False, put_=False):
         put(BASE_URL + endpoint, headers=headers)
 
     response = get(BASE_URL + endpoint, {}, headers=headers)
+    print(response)
     try:
         return response.json()
     except:

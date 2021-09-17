@@ -59,7 +59,6 @@ export default class Room extends Component {
       .then((response) => response.json())
       .then((data) => {
         this.setState({ spotifyAuthenticated: data.status });
-        console.log(data.status);
         if (!data.status) {
           fetch("http://127.0.0.1:8000/spotify/get-auth-url")
             .then((response) => response.json())
