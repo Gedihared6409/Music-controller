@@ -5,6 +5,7 @@
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+  align-items: flex-end;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -35,4 +36,11 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
