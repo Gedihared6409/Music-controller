@@ -27,6 +27,7 @@ export default class HomePage extends Component {
         this.setState({
           roomCode: data.code,
         });
+        console.log(data.code)
       });
   }
   
